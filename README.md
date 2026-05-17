@@ -18,7 +18,7 @@ without a token.
 
 ## Install
 
-### Local Python
+### From PyPI (recommended)
 
 ```bash
 pip install interactsh-mcp
@@ -28,12 +28,28 @@ uv tool install interactsh-mcp
 
 After install the `interactsh-mcp` command starts the MCP server on stdio.
 
+### From GitHub (latest, no PyPI release needed)
+
+```bash
+pip install git+https://github.com/rek7/interactsh-mcp.git
+# or, run without installing:
+uvx --from git+https://github.com/rek7/interactsh-mcp.git interactsh-mcp
+```
+
+### From source
+
+```bash
+git clone https://github.com/rek7/interactsh-mcp.git
+cd interactsh-mcp
+pip install .
+```
+
 ### Docker
 
 ```bash
+# Build locally
 docker build -t interactsh-mcp .
-# Smoke test (Ctrl-D to exit):
-docker run --rm -i interactsh-mcp
+docker run --rm -i interactsh-mcp     # smoke test; Ctrl-D to exit
 ```
 
 The image runs as a non-root user and only needs outbound HTTPS to the
@@ -211,7 +227,7 @@ for DNS, TLS, and infra setup.
 ## Development
 
 ```bash
-git clone <this-repo>
+git clone https://github.com/rek7/interactsh-mcp.git
 cd interactsh-mcp
 python -m venv .venv && source .venv/bin/activate
 pip install -e '.[test]'
