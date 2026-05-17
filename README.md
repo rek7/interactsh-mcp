@@ -14,6 +14,13 @@ Works against the **public** Interactsh service (the public `oast.*`
 rotation) out of the box, and against any **self-hosted** server — with or
 without a token.
 
+The package ships two things in one install:
+
+1. An **MCP server** binary (`interactsh-mcp`) for Claude Code, Codex CLI, etc.
+2. An **async Python library** (`interactsh_mcp`) you can `import` directly
+   if you'd rather drive Interactsh from your own code — see
+   [Use as a Python library](#use-as-a-python-library) below.
+
 ---
 
 ## Install
@@ -204,6 +211,65 @@ Claude Code example above.
 For multiple test variants in one conversation the agent can either call
 `create_session` per variant or call `new_payload` to get distinct URLs that
 share a session.
+
+---
+
+## Use as a Python library
+
+The package exports an async client you can import directly — no MCP, no
+LLM, just `interactsh_mcp`:
+
+```python
+import asyncio
+from interactsh_mcp import InteractshClient
+
+async def main():
+    # No args → random public oast.* server. Pass server=/token= to target a
+    # self-hosted instance (token only needed if it was started with -auth).
+    async with InteractshClient() as client:
+        payload_url = client.generate_payload()
+        print(f"send something to: {payload_url}")
+
+        # ... fire your exploit / trigger the target with that URL ...
+
+        for event in await client.poll():
+            print(f"{event.protocol} from {event.remote_address}")
+
+asyncio.run(main())
+```
+
+For longer-lived setups (multiple payloads, background polling, buffered
+events), use the session manager:
+
+```python
+from interactsh_mcp import SessionManager
+
+mgr = SessionManager()
+session = await mgr.create(poll_interval=2.0)
+
+url_a = mgr.new_payload(session)   # different nonce, same correlation-id
+url_b = mgr.new_payload(session)
+# ... trigger both ...
+
+events = await session.drain(wait=15)   # blocks until first event or timeout
+await mgr.aclose()
+```
+
+Exports at the package root:
+
+| Name | What it is |
+| --- | --- |
+| `InteractshClient` | Async client. Context-manage it; `register()` / `poll()` / `deregister()` / `generate_payload()`. |
+| `Interaction` | Dataclass for a single decoded event: `protocol`, `unique_id`, `full_id`, `q_type`, `raw_request`, `raw_response`, `remote_address`, `timestamp`, `raw` (full JSON). |
+| `InteractshError` | Raised on registration/poll failures. |
+| `Session` / `SessionManager` | Background-polling multi-session helpers. |
+| `DEFAULT_SERVERS` | Tuple of public `oast.*` hostnames. |
+
+The package ships type stubs (`py.typed`), so mypy / pyright pick the types
+up automatically. If you need to call from sync code, wrap with
+`asyncio.run(...)` — see [`examples/04_sync_wrapper.py`](examples/04_sync_wrapper.py).
+
+More runnable examples: [`examples/`](examples/).
 
 ---
 

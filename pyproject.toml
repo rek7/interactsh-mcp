@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "interactsh-mcp"
-version = "0.1.0"
-description = "MCP server for ProjectDiscovery's Interactsh OOB testing platform"
+version = "0.1.1"
+description = "Async Python client + MCP server for ProjectDiscovery's Interactsh OOB testing platform"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
