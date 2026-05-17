@@ -1,0 +1,18 @@
+# Convenience compose file for building/testing the image.
+#
+# MCP servers communicate over stdio, so this isn't how you'd "run" the server
+# in production — your MCP client (Claude Code, Codex CLI, ...) spawns the
+# container directly. This file is here so you can `docker compose build` and
+# verify the image, and `docker compose run --rm interactsh-mcp` to smoke-test.
+
+services:
+  interactsh-mcp:
+    build: .
+    image: interactsh-mcp:latest
+    stdin_open: true
+    tty: false
+    environment:
+      # Uncomment to target a self-hosted server instead of the public oast.* rotation.
+      # INTERACTSH_SERVER: interact.example.com
+      # INTERACTSH_TOKEN:  ${INTERACTSH_TOKEN:-}
+      INTERACTSH_LOG_LEVEL: WARNING
